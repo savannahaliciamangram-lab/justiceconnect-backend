@@ -11,52 +11,60 @@ const client = new OpenAI({
 });
 
 app.post("/analyze", async (req, res) => {
-  const { summary, incidentDate, hasFiled, litigationStage } = req.body;
-
-  const prompt = `
-You are a legal intake assistant for Arizona civil matters.
-Do NOT give legal advice.
-Do NOT say representation exists.
-
-User summary: ${summary}
-Incident date: ${incidentDate}
-Filed: ${hasFiled}
-Stage: ${litigationStage || "Not provided"}
-
-Return JSON:
-{
-  "caseType": "...",
-  "claimStatus": "...",
-  "timeliness": "...",
-  "urgency": "...",
-  "nextStep": "..."
-}
-`;
-
   try {
-    const response = await client.responses.create({
+    const { text } = req.body;
+
+    if (!text || !text.trim()) {
+      return res.status(400).json({ error: "No legal issue provided." });
+    }
+
+    const completion = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
-      input: prompt,
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: `
+You are assisting with legal issue intake for informational purposes only.
+Do not give legal advice.
+Based on the user's description, identify up to 3 possible causes of action.
+
+Use cautious wording such as:
+- "possible"
+- "may"
+- "could"
+
+If the facts are too limited, say so.
+
+Return valid JSON in exactly this shape:
+{
+  "short_summary": "string",
+  "possible_causes_of_action": [
+    {
+      "name": "string",
+      "likelihood": "high" | "medium" | "low",
+      "reason": "string",
+      "missing_facts": ["string"]
+    }
+  ],
+  "disclaimer": "string"
+}
+          `.trim(),
+        },
+        {
+          role: "user",
+          content: `User legal issue: ${text}`,
+        },
+      ],
+      temperature: 0.2,
     });
 
-    const text = response.output_text;
-    const parsed = JSON.parse(text);
+    const raw = completion.choices[0]?.message?.content;
+    const parsed = JSON.parse(raw);
 
     res.json(parsed);
   } catch (error) {
-    console.error(error);
-    res.json({
-      caseType: "Possible civil issue",
-      claimStatus: "Needs attorney review",
-      timeliness: "Unknown",
-      urgency: "Medium",
-      nextStep: "Consult a legal aid organization",
-    });
+    console.error("Analyze error:", error);
+    res.status(500).json({ error: "Failed to analyze legal issue." });
   }
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });
