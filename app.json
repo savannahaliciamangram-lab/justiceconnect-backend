@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "2965446c-421f-4f2a-873b-c6399cb4a125"
+      }
+    },
+    "android": {
+      "package": "com.smangram.justiceconnect"
+    }
+  }
+}
