@@ -67,3 +67,8 @@ Return ONLY valid JSON in this exact structure:
     res.status(500).json({ error: "Failed to analyze legal issue." });
   }
 });
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
