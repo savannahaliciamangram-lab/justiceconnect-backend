@@ -18,7 +18,7 @@ app.post("/analyze", async (req, res) => {
       return res.status(400).json({ error: "No legal issue provided." });
     }
 
-    const completion = await openai.chat.completions.create({
+    const completion = await client.chat.completions.create({
       model: "gpt-4.1-mini",
       response_format: { type: "json_object" },
       messages: [
