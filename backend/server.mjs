@@ -27,16 +27,18 @@ app.post("/analyze", async (req, res) => {
           content: `
 You are assisting with legal issue intake for informational purposes only.
 Do not give legal advice.
-Based on the user's description, identify up to 3 possible causes of action.
 
-Use cautious wording such as:
+Based on the user's description, identify up to 3 possible causes of action 
+(e.g., negligence, wrongful death, breach of contract, etc.).
+
+Use cautious language like:
 - "possible"
 - "may"
 - "could"
 
-If the facts are too limited, say so.
+If the facts are insufficient, say that more information is needed.
 
-Return valid JSON in exactly this shape:
+Return ONLY valid JSON in this exact structure:
 {
   "short_summary": "string",
   "possible_causes_of_action": [
@@ -47,7 +49,7 @@ Return valid JSON in exactly this shape:
       "missing_facts": ["string"]
     }
   ],
-  "disclaimer": "string"
+  "disclaimer": "This is informational only and not legal advice."
 }
           `.trim(),
         },
